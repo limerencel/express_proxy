@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors'); // FIXED: Add cors import
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');  // Add Morgan for request logging
 
 const PORT = process.env.PORT || 4000;
 const app = express();
