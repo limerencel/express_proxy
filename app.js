@@ -7,6 +7,29 @@ const rateLimit = require('express-rate-limit');
 const PORT = process.env.PORT || 4000;
 const app = express();
 
+
+// Configure Morgan for request logging
+app.use(morgan(':date[iso] - :remote-addr - ":method :url" - Status :status - :response-time ms'));
+// Add simple route logging middleware
+app.use((req, res, next) => {
+  // Log only the first visit to specific routes
+  if (!req.url.endsWith('favicon.ico') && !req.headers['x-logged']) {
+    const timestamp = new Date().toISOString();
+    const userAgent = req.get('user-agent') || 'Unknown';
+    const lang = req.get('accept-language') || 'Unknown';
+    const clientIp = req.headers['x-forwarded-for'] || req.ip;
+    
+    console.log(`\n[${timestamp}] ${clientIp} requested ${req.method} ${req.url}`);
+    console.log(`  -> User Agent: ${userAgent}`);
+    console.log(`  -> Language: ${lang}`);
+    console.log(`  -> Referer: ${req.get('referer') || 'Direct'}`);
+    
+    // Flag to prevent duplicate logging
+    req.headers['x-logged'] = 'true';
+  }
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 
