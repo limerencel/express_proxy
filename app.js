@@ -7,18 +7,17 @@ const rateLimit = require('express-rate-limit');
 const PORT = process.env.PORT || 4000;
 const app = express();
 
-// MIDDLEWARE ORDER FIXED:
 app.use(cors());
 app.use(express.json());
 
-// Global security headers - MOVED UP
+// Global security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   next(); // MUST call next()
 });
 
-// Rate limiter - MOVED BEFORE PROXY
+// Rate limiter
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
   max: 100, // Increased limit for streaming
@@ -54,12 +53,11 @@ const ollamaProxy = createProxyMiddleware({
         proxyRes.headers[header] && delete proxyRes.headers[header];
       });
       
-      // REMOVED duplicate CSP header
     }
   }
 });
 
-// Proxy mount - AFTER rate limiter
+// Proxy mount
 app.use('/ollama', ollamaProxy);
 
 // Routes
@@ -67,7 +65,7 @@ app.get('/', (req, res) => {
   res.send("Ollama Proxy Running");
 });
 
-// Error handling (unchanged)
+// Error handling
 app.use((req, res) => res.status(404).json({error: "Not Found"}));
 app.use((err, req, res, next) => {
   console.error(err.stack);
